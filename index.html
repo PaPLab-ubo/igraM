@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memorijska Avantura za Djecu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#b3e5fc 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(255, 105, 180, 0.2);
+            border: 8px solid #ffcc00;
+        }
+        
+        h1 {
+            color: #ff3366;
+            font-size: 2.8rem;
+            text-shadow: 3px 3px 0 #ffcc00;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #3366ff;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        
+        /* Game screens */
+        .screen {
+            display: none;
+            background-color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 6px solid #4dccbd;
+        }
+        
+        .active-screen {
+            display: block;
+        }
+        
+        /* Setup screen */
+        .setup-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .option-card {
+            background: #e6f7ff;
+            border-radius: 15px;
+            padding: 20px;
+            border: 5px solid #a5d8ff;
+            transition: transform 0.3s;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .option-title {
+            color: #ff6b6b;
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .option-title i {
+            color: #ff9966;
+        }
+        
+        .player-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .player-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .player-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #3366ff;
+            min-width: 120px;
+        }
+        
+        .player-input {
+            padding: 12px;
+            border: 3px solid #a5d8ff;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            flex: 1;
+        }
+        
+        .level-buttons, .size-buttons, .category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .level-btn, .size-btn, .category-btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .level-btn {
+            background-color: #ff9966;
+            color: white;
+        }
+        
+        .level-btn:hover, .level-btn.active {
+            background-color: #ff3366;
+            transform: scale(1.05);
+        }
+        
+        .size-btn {
+            background-color: #ffcc00;
+            color: #333;
+        }
+        
+        .size-btn:hover, .size-btn.active {
+            background-color: #ff9966;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .category-btn {
+            background-color: #a5d8ff;
+            color: #333;
+        }
+        
+        .category-btn:hover, .category-btn.active {
+            background-color: #4d96ff;
+            color: white;
+        }
+        
+        /* Dice roll section */
+        .dice-section {
+            background-color: #fff8e1;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border: 5px dashed #ffcc00;
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff3366;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            border: 5px solid #ff9966;
+        }
+        
+        .roll-btn {
+            background: linear-gradient(135deg, #ff9966 0%, #ff3366 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+        }
+        
+        /* Game screen */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #a5d8ff 0%, #4d96ff 100%);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .player-info {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .player-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+        
+        .current-player {
+            box-shadow: 0 0 0 4px white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #ff3366;
+        }
+        
+        .memory-grid {
+            display: grid;
+            gap: 15px;
+            margin: 0 auto;
+            justify-content: center;
+        }
+        
+        .memory-card {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            position: relative;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .memory-card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .memory-card.matched {
+            cursor: default;
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #ffcc00 0%, #ff9966 100%);
+            transform: rotateY(180deg);
+            color: white;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff3366 100%);
+            color: white;
+        }
+        
+        .card-back i {
+            font-size: 2rem;
+        }
+        
+        .image-card .card-front {
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .memory-mode {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 15px 0;
+            color: #4d96ff;
+            font-weight: bold;
+        }
+        
+        .category-reference {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e6f7ff;
+            border-radius: 15px;
+        }
+        
+        .reference-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .reference-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid #ff9966;
+        }
+        
+        /* Dashboard screen */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #a5d8ff 0%, #4d96ff 100%);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .chart-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 4px solid #ffcc00;
+        }
+        
+        .parent-question {
+            background-color: #fff8e1;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 4px solid #ffcc00;
+        }
+        
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #ff3366;
+            font-weight: bold;
+        }
+        
+        .question-options {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .question-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .yes-btn {
+            background-color: #4dccbd;
+            color: white;
+        }
+        
+        .no-btn {
+            background-color: #ff9966;
+            color: white;
+        }
+        
+        /* Control buttons */
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .control-btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+        }
+        
+        .control-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #4dccbd 0%, #2a9d8f 100%);
+            color: white;
+        }
+        
+        .dashboard-btn {
+            background: linear-gradient(135deg, #ff9966 0%, #ff6b6b 100%);
+            color: white;
+        }
+        
+        .back-btn {
+            background: linear-gradient(135deg, #a5d8ff 0%, #4d96ff 100%);
+            color: white;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(135deg, #ffcc00 0%, #ff9966 100%);
+            color: white;
+        }
+        
+        /* Celebration effects */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            flex-direction: column;
+        }
+        
+        .celebration.active {
+            display: flex;
+        }
+        
+        .celebration-text {
+            font-size: 4rem;
+            color: #ff3366;
+            text-shadow: 4px 4px 0 #ffcc00;
+            margin-bottom: 30px;
+            text-align: center;
+            animation: bounce 1s infinite alternate;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-30px); }
+        }
+        
+        .celebration-effects {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .effect-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .confetti-btn {
+            background-color: #ff9966;
+            color: white;
+        }
+        
+        .rocket-btn {
+            background-color: #4d96ff;
+            color: white;
+        }
+        
+        .applause-btn {
+            background-color: #4dccbd;
+            color: white;
+        }
+        
+        /* Voice indicator */
+        .voice-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            color: #4d96ff;
+            font-weight: bold;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .setup-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .level-btn, .size-btn, .category-btn {
+                min-width: 100px;
+                font-size: 1rem;
+                padding: 10px 15px;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .player-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .celebration-text {
+                font-size: 2.5rem;
+            }
+            
+            .dice-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-brain"></i> Memorijska Avantura za Djecu</h1>
+            <p class="subtitle">Pronađite parove i zabavite se!</p>
+        </div>
+        
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="screen active-screen">
+            <h2 class="option-title"><i class="fas fa-cogs"></i> Postavke igre</h2>
+            
+            <div class="player-inputs">
+                <div class="player-input-group">
+                    <span class="player-label">Igrač 1:</span>
+                    <input type="text" id="player1-name" class="player-input" placeholder="Unesite ime igrača 1" value="Amar">
+                </div>
+                <div class="player-input-group">
+                    <span class="player-label">Igrač 2:</span>
+                    <input type="text" id="player2-name" class="player-input" placeholder="Unesite ime igrača 2 (ostavite prazno za jednog igrača)" value="Lejla">
+                </div>
+            </div>
+            
+            <div class="setup-options">
+                <!-- Level selection -->
+                <div class="option-card">
+                    <h3 class="option-title"><i class="fas fa-chart-line"></i> Vrijeme za pamćenje</h3>
+                    <div class="level-buttons">
+                        <button class="level-btn active" data-level="pocetnik" data-time="10">Početnik (10s)</button>
+                        <button class="level-btn" data-level="srednji" data-time="8">Srednji (8s)</button>
+                        <button class="level-btn" data-level="napredni" data-time="6">Napredni (6s)</button>
+                        <button class="level-btn" data-level="tezak" data-time="4">Težak (4s)</button>
+                        <button class="level-btn" data-level="zabava" data-time="2">Zabava (2s)</button>
+                    </div>
+                    <p>Vrijeme za pamćenje karata prije nego što se okrenu</p>
+                </div>
+                
+                <!-- Grid size selection -->
+                <div class="option-card">
+                    <h3 class="option-title"><i class="fas fa-th"></i> Veličina mreže</h3>
+                    <div class="size-buttons">
+                        <button class="size-btn" data-size="2">2x2</button>
+                        <button class="size-btn" data-size="3">3x3</button>
+                        <button class="size-btn active" data-size="4">4x4</button>
+                        <button class="size-btn" data-size="5">5x5</button>
+                        <button class="size-btn" data-size="6">6x6</button>
+                        <button class="size-btn" data-size="7">7x7</button>
+                        <button class="size-btn" data-size="8">8x8</button>
+                        <button class="size-btn" data-size="9">9x9</button>
+                        <button class="size-btn" data-size="10">10x10</button>
+                    </div>
+                    <p>Odaberite koliko kartica želite igrati</p>
+                </div>
+                
+                <!-- Category selection -->
+                <div class="option-card">
+                    <h3 class="option-title"><i class="fas fa-images"></i> Kategorije slika</h3>
+                    <div class="category-buttons">
+                        <button class="category-btn active" data-category="zivotinje"><i class="fas fa-paw"></i> Životinje</button>
+                        <button class="category-btn" data-category="voce"><i class="fas fa-apple-alt"></i> Voće</button>
+                        <button class="category-btn" data-category="povrce"><i class="fas fa-carrot"></i> Povrće</button>
+                        <button class="category-btn" data-category="porodica"><i class="fas fa-users"></i> Porodica</button>
+                        <button class="category-btn" data-category="slova"><i class="fas fa-font"></i> Slova</button>
+                        <button class="category-btn" data-category="brojevi"><i class="fas fa-sort-numeric-up"></i> Brojevi</button>
+                        <button class="category-btn" data-category="boje"><i class="fas fa-palette"></i> Boje</button>
+                        <button class="category-btn" data-category="vozila"><i class="fas fa-car"></i> Vozila</button>
+                        <button class="category-btn" data-category="miks"><i class="fas fa-random"></i> Miks</button>
+                    </div>
+                    <p>Slova i brojevi će biti pročitani naglas</p>
+                </div>
+            </div>
+            
+            <!-- Dice roll to determine who starts -->
+            <div class="dice-section">
+                <h3 class="option-title"><i class="fas fa-dice"></i> Bacite kocku da vidite ko počinje</h3>
+                <p>Svaki igrač baca kocku. Igrač sa većim brojem počinje prvi.</p>
+                
+                <div class="dice-container">
+                    <div>
+                        <div id="player1-dice" class="dice">?</div>
+                        <p id="player1-name-display">Amar</p>
+                    </div>
+                    <div>
+                        <div id="player2-dice" class="dice">?</div>
+                        <p id="player2-name-display">Lejla</p>
+                    </div>
+                </div>
+                
+                <div id="dice-result" style="font-size: 1.3rem; margin: 15px 0; color: #ff3366; font-weight: bold;"></div>
+                
+                <button class="roll-btn" id="roll-dice-btn">
+                    <i class="fas fa-dice"></i> Baci kocku
+                </button>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="control-btn start-btn" id="start-game">
+                    <i class="fas fa-play"></i> Zapocni igru
+                </button>
+                <button class="control-btn dashboard-btn" id="view-dashboard">
+                    <i class="fas fa-chart-bar"></i> Kontrolna tabla
+                </button>
+            </div>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="player-info">
+                    <div id="player1-display" class="player-display current-player">
+                        <i class="fas fa-user"></i>
+                        <span id="current-player1-name">Igrač 1</span>
+                        <span id="player1-score">0</span>
+                    </div>
+                    <div id="player2-display" class="player-display">
+                        <i class="fas fa-user"></i>
+                        <span id="current-player2-name">Igrač 2</span>
+                        <span id="player2-score">0</span>
+                    </div>
+                </div>
+                
+                <div class="game-stats">
+                    <div><i class="fas fa-clock"></i> Vrijeme: <span id="game-time">00:00</span></div>
+                    <div><i class="fas fa-retweet"></i> Potezi: <span id="moves-count">0</span></div>
+                    <div><i class="fas fa-layer-group"></i> Nivo: <span id="current-level">Početnik</span></div>
+                </div>
+            </div>
+            
+            <div class="voice-indicator">
+                <i class="fas fa-volume-up"></i>
+                <span id="voice-instruction">Spremite se za pamćenje karata!</span>
+            </div>
+            
+            <div class="memory-mode" id="memory-mode">Zapamtite karte u <span id="memorize-time">10</span> sekundi</div>
+            <div class="timer-display" id="countdown-timer">10</div>
+            
+            <div class="memory-grid" id="memory-grid">
+                <!-- Cards will be generated here -->
+            </div>
+            
+            <div class="category-reference" id="category-reference">
+                <!-- Reference images will be added here -->
+            </div>
+            
+            <div class="control-buttons">
+                <button class="control-btn back-btn" id="back-to-setup">
+                    <i class="fas fa-arrow-left"></i> Nazad na postavke
+                </button>
+                <button class="control-btn dashboard-btn" id="dashboard-from-game">
+                    <i class="fas fa-chart-bar"></i> Kontrolna tabla
+                </button>
+                <button class="control-btn restart-btn" id="restart-game">
+                    <i class="fas fa-redo"></i> Ponovi igru
+                </button>
+            </div>
+        </div>
+        
+        <!-- Dashboard Screen -->
+        <div id="dashboard-screen" class="screen">
+            <h2 class="option-title"><i class="fas fa-chart-line"></i> Kontrolna tabla za roditelje</h2>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Odigrane igre</h3>
+                    <div class="stat-value" id="total-games">0</div>
+                    <p>Ukupno odigranih igara</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Prosječno vrijeme</h3>
+                    <div class="stat-value" id="avg-time">00:00</div>
+                    <p>Za završetak igre</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Prosječno poteza</h3>
+                    <div class="stat-value" id="avg-moves">0</div>
+                    <p>Po igri</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Uspješnost</h3>
+                    <div class="stat-value" id="success-rate">0%</div>
+                    <p>Tačnih parova</p>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3><i class="fas fa-chart-pie"></i> Učinak po igraču</h3>
+                <canvas id="performance-chart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h3><i class="fas fa-chart-bar"></i> Napredak kroz vrijeme</h3>
+                <canvas id="progress-chart"></canvas>
+            </div>
+            
+            <div class="parent-question">
+                <p class="question-text">Želite li pratiti napredak vašeg djeteta sa dosljednim pozicijama karata?</p>
+                <p style="margin-bottom: 15px;">Ako odaberete DA, iste pozicije karata će se koristiti svaki put za tačno praćenje napretka.</p>
+                <div class="question-options">
+                    <button class="question-btn yes-btn" id="track-progress-yes">Da, prati napredak</button>
+                    <button class="question-btn no-btn" id="track-progress-no">Ne, nasumično mijenjaj karte</button>
+                </div>
+                <p id="tracking-status" style="margin-top: 15px; font-weight: bold; color: #4d96ff;"></p>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="control-btn back-btn" id="back-from-dashboard">
+                    <i class="fas fa-arrow-left"></i> Nazad na igru
+                </button>
+                <button class="control-btn restart-btn" id="new-game-from-dashboard">
+                    <i class="fas fa-plus"></i> Nova igra
+                </button>
+            </div>
+        </div>
+        
+        <!-- Celebration overlay -->
+        <div class="celebration" id="celebration">
+            <div class="celebration-text" id="celebration-text">BRAVO! POBJEDILI STE!</div>
+            <div style="font-size: 2rem; color: #4d96ff; margin-bottom: 30px;" id="winner-name">Čestitamo!</div>
+            
+            <div class="celebration-effects">
+                <button class="effect-btn confetti-btn" id="confetti-effect">
+                    <i class="fas fa-birthday-cake"></i> Konfeti
+                </button>
+                <button class="effect-btn rocket-btn" id="rocket-effect">
+                    <i class="fas fa-rocket"></i> Rakete
+                </button>
+                <button class="effect-btn applause-btn" id="applause-effect">
+                    <i class="fas fa-hands-clapping"></i> Pljesak
+                </button>
+            </div>
+            
+            <button class="control-btn start-btn" id="continue-playing" style="margin-top: 30px;">
+                <i class="fas fa-play"></i> Igraj ponovo
+            </button>
+        </div>
+        
+        <!-- Confetti canvas -->
+        <canvas id="confetti-canvas"></canvas>
+        
+        <!-- Audio elements -->
+        <audio id="celebration-sound" preload="auto">
+            <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="correct-sound" preload="auto">
+            <source src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="applause-sound" preload="auto">
+            <source src="https://assets.mixkit.co/sfx/preview/mixkit-audience-clapping-loudly-478.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="rocket-sound" preload="auto">
+            <source src="https://assets.mixkit.co/sfx/preview/mixkit-spaceship-woosh-2151.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="turn-sound" preload="auto">
+            <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-ball-tap-2073.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            gridSize: 4,
+            level: 'pocetnik',
+            memorizeTime: 10,
+            category: 'zivotinje',
+            players: 2,
+            player1: {
+                name: 'Amar',
+                diceRoll: 0,
+                score: 0,
+                totalGames: 0,
+                totalWins: 0,
+                totalTime: 0,
+                totalMoves: 0
+            },
+            player2: {
+                name: 'Lejla',
+                diceRoll: 0,
+                score: 0,
+                totalGames: 0,
+                totalWins: 0,
+                totalTime: 0,
+                totalMoves: 0
+            },
+            currentPlayer: 1,
+            firstPlayer: 1,
+            cards: [],
+            flippedCards: [],
+            matchedPairs: 0,
+            moves: 0,
+            gameStarted: false,
+            gameTime: 0,
+            timer: null,
+            memorizeTimer: null,
+            totalPairs: 0,
+            gameHistory: [],
+            trackProgress: false,
+            fixedCardPositions: null,
+            gameMode: 'memorize', // 'memorize' or 'play'
+            voiceEnabled: true,
+            speechSynth: null
+        };
+
+        // Image database - prevedeno na bosanski
+        const imageDatabase = {
+            zivotinje: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵'],
+            voce: ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥'],
+            povrce: ['🥕', '🌽', '🌶️', '🥒', '🥬', '🥦', '🧄', '🧅', '🥔', '🍠', '🥜', '🌰', '🫑', '🫒', '🍅'],
+            porodica: ['👨', '👩', '👦', '👧', '👶', '👴', '👵', '👨‍👩‍👦', '👨‍👩‍👧', '👨‍👩‍👧‍👦', '👨‍👩‍👦‍👦', '👨‍👩‍👧‍👧', '👨‍👨‍👦', '👩‍👩‍👧', '👪'],
+            slova: ['A', 'B', 'C', 'Č', 'Ć', 'D', 'Đ', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
+            brojevi: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
+            boje: ['🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '🟤', '⚫', '⚪', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪'],
+            vozila: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🛴', '🚲'],
+            miks: []
+        };
+
+        // Letter and number pronunciation - na bosanski
+        const pronunciation = {
+            'A': 'A', 'B': 'B', 'C': 'C', 'Č': 'Č', 'Ć': 'Ć', 'D': 'D', 'Đ': 'Đ', 
+            'E': 'E', 'F': 'F', 'G': 'G', 'H': 'H', 'I': 'I', 'J': 'J', 'K': 'K', 
+            'L': 'L', 'M': 'M', 'N': 'N', 'O': 'O', 'P': 'P', 'R': 'R', 'S': 'S',
+            'Š': 'Š', 'T': 'T', 'U': 'U', 'V': 'V', 'Z': 'Z', 'Ž': 'Ž',
+            '1': 'Jedan', '2': 'Dva', '3': 'Tri', '4': 'Četiri', '5': 'Pet',
+            '6': 'Šest', '7': 'Sedam', '8': 'Osam', '9': 'Devet', '10': 'Deset',
+            '11': 'Jedanaest', '12': 'Dvanaest', '13': 'Trinaest', '14': 'Četrnaest', '15': 'Petnaest'
+        };
+
+        // Initialize mixed category
+        function initializeMixedCategory() {
+            imageDatabase.miks = [
+                ...imageDatabase.zivotinje.slice(0, 3),
+                ...imageDatabase.voce.slice(0, 3),
+                ...imageDatabase.povrce.slice(0, 3),
+                ...imageDatabase.porodica.slice(0, 3),
+                ...imageDatabase.slova.slice(0, 3),
+                ...imageDatabase.brojevi.slice(0, 3),
+                ...imageDatabase.boje.slice(0, 3),
+                ...imageDatabase.vozila.slice(0, 3)
+            ];
+        }
+
+        // DOM elements
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const dashboardScreen = document.getElementById('dashboard-screen');
+        const memoryGrid = document.getElementById('memory-grid');
+        const categoryReference = document.getElementById('category-reference');
+        const celebrationScreen = document.getElementById('celebration');
+        const celebrationSound = document.getElementById('celebration-sound');
+        const correctSound = document.getElementById('correct-sound');
+        const applauseSound = document.getElementById('applause-sound');
+        const rocketSound = document.getElementById('rocket-sound');
+        const turnSound = document.getElementById('turn-sound');
+
+        // Initialize the game
+        function init() {
+            initializeMixedCategory();
+            setupEventListeners();
+            updatePlayerNameDisplays();
+            
+            // Initialize speech synthesis if available
+            if ('speechSynthesis' in window) {
+                gameState.speechSynth = window.speechSynthesis;
+                
+                // Set voice properties for child-friendly voice
+                const voices = gameState.speechSynth.getVoices();
+                if (voices.length > 0) {
+                    // Try to find a Croatian/Bosnian/Serbian voice
+                    const bhsVoice = voices.find(voice => 
+                        voice.lang.startsWith('hr') || voice.lang.startsWith('bs') || voice.lang.startsWith('sr')
+                    );
+                    if (bhsVoice) {
+                        gameState.voice = bhsVoice;
+                    } else {
+                        // Fallback to any available voice
+                        gameState.voice = voices[0];
+                    }
+                }
+            }
+            
+            // Load game history from localStorage
+            loadGameHistory();
+            
+            // Set default tracking preference
+            const trackingPref = localStorage.getItem('memoryTrackProgress');
+            if (trackingPref !== null) {
+                gameState.trackProgress = trackingPref === 'true';
+                updateTrackingStatus();
+            }
+        }
+
+        // Setup all event listeners
+        function setupEventListeners() {
+            // Player name inputs
+            document.getElementById('player1-name').addEventListener('input', updatePlayerNames);
+            document.getElementById('player2-name').addEventListener('input', updatePlayerNames);
+            
+            // Level buttons
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameState.level = btn.dataset.level;
+                    gameState.memorizeTime = parseInt(btn.dataset.time);
+                    document.getElementById('memorize-time').textContent = gameState.memorizeTime;
+                });
+            });
+
+            // Grid size buttons - FIX: Ensure even number of cards for pairs
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const size = parseInt(btn.dataset.size);
+                    // Ensure grid size is valid (at least 2)
+                    if (size >= 2) {
+                        gameState.gridSize = size;
+                    } else {
+                        gameState.gridSize = 2;
+                    }
+                });
+            });
+
+            // Category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameState.category = btn.dataset.category;
+                });
+            });
+
+            // Dice roll button
+            document.getElementById('roll-dice-btn').addEventListener('click', rollDice);
+
+            // Control buttons
+            document.getElementById('start-game').addEventListener('click', startGame);
+            document.getElementById('view-dashboard').addEventListener('click', showDashboard);
+            document.getElementById('back-to-setup').addEventListener('click', () => showScreen('setup-screen'));
+            document.getElementById('dashboard-from-game').addEventListener('click', showDashboard);
+            document.getElementById('restart-game').addEventListener('click', restartGame);
+            document.getElementById('back-from-dashboard').addEventListener('click', () => {
+                if (gameState.gameStarted) {
+                    showScreen('game-screen');
+                } else {
+                    showScreen('setup-screen');
+                }
+            });
+            document.getElementById('new-game-from-dashboard').addEventListener('click', () => {
+                showScreen('setup-screen');
+            });
+            document.getElementById('continue-playing').addEventListener('click', () => {
+                celebrationScreen.classList.remove('active');
+                restartGame();
+            });
+
+            // Celebration effect buttons
+            document.getElementById('confetti-effect').addEventListener('click', launchConfetti);
+            document.getElementById('rocket-effect').addEventListener('click', launchRockets);
+            document.getElementById('applause-effect').addEventListener('click', playApplause);
+
+            // Parent tracking buttons
+            document.getElementById('track-progress-yes').addEventListener('click', () => {
+                gameState.trackProgress = true;
+                localStorage.setItem('memoryTrackProgress', 'true');
+                updateTrackingStatus();
+            });
+            
+            document.getElementById('track-progress-no').addEventListener('click', () => {
+                gameState.trackProgress = false;
+                localStorage.setItem('memoryTrackProgress', 'false');
+                updateTrackingStatus();
+            });
+
+            // Set default active buttons
+            document.querySelector('.level-btn[data-level="pocetnik"]').classList.add('active');
+            document.querySelector('.size-btn[data-size="4"]').classList.add('active');
+            document.querySelector('.category-btn[data-category="zivotinje"]').classList.add('active');
+        }
+
+        // Update player name displays
+        function updatePlayerNames() {
+            gameState.player1.name = document.getElementById('player1-name').value || 'Igrač 1';
+            gameState.player2.name = document.getElementById('player2-name').value || 'Igrač 2';
+            
+            // Update displays
+            document.getElementById('player1-name-display').textContent = gameState.player1.name;
+            document.getElementById('player2-name-display').textContent = gameState.player2.name;
+            document.getElementById('current-player1-name').textContent = gameState.player1.name;
+            document.getElementById('current-player2-name').textContent = gameState.player2.name;
+            
+            // Determine if single or multiplayer
+            const player2Input = document.getElementById('player2-name').value;
+            gameState.players = (player2Input === '' || player2Input.trim() === '') ? 1 : 2;
+            
+            // Update player 2 display visibility
+            if (gameState.players === 1) {
+                document.getElementById('player2-display').style.display = 'none';
+            } else {
+                document.getElementById('player2-display').style.display = 'flex';
+            }
+        }
+
+        // Update player name displays for dice
+        function updatePlayerNameDisplays() {
+            document.getElementById('player1-name-display').textContent = gameState.player1.name;
+            document.getElementById('player2-name-display').textContent = gameState.player2.name;
+        }
+
+        // Roll dice to determine who starts
+        function rollDice() {
+            // Roll dice for both players
+            gameState.player1.diceRoll = Math.floor(Math.random() * 6) + 1;
+            gameState.player2.diceRoll = Math.floor(Math.random() * 6) + 1;
+            
+            // Display dice rolls
+            document.getElementById('player1-dice').textContent = gameState.player1.diceRoll;
+            document.getElementById('player2-dice').textContent = gameState.player2.diceRoll;
+            
+            // Determine who starts first
+            let resultText = '';
+            if (gameState.player1.diceRoll > gameState.player2.diceRoll) {
+                gameState.firstPlayer = 1;
+                gameState.currentPlayer = 1;
+                resultText = `${gameState.player1.name} počinje prvi!`;
+            } else if (gameState.player2.diceRoll > gameState.player1.diceRoll) {
+                gameState.firstPlayer = 2;
+                gameState.currentPlayer = 2;
+                resultText = `${gameState.player2.name} počinje prvi!`;
+            } else {
+                // Tie - roll again
+                resultText = "Izjednačeno! Bacite ponovo.";
+            }
+            
+            document.getElementById('dice-result').textContent = resultText;
+            
+            // Speak the result
+            speak(resultText);
+        }
+
+        // Start the game
+        function startGame() {
+            // Update player names from inputs
+            updatePlayerNames();
+            
+            // Reset game state
+            gameState.cards = [];
+            gameState.flippedCards = [];
+            gameState.matchedPairs = 0;
+            gameState.moves = 0;
+            gameState.gameStarted = true;
+            gameState.gameTime = 0;
+            gameState.gameMode = 'memorize';
+            
+            // Set current player based on dice roll
+            if (gameState.player1.diceRoll === 0 || gameState.player2.diceRoll === 0) {
+                // If dice hasn't been rolled, player 1 starts
+                gameState.currentPlayer = 1;
+                gameState.firstPlayer = 1;
+            } else {
+                gameState.currentPlayer = gameState.firstPlayer;
+            }
+            
+            // Calculate total pairs - FIX: Ensure even number of cards
+            let totalCards = gameState.gridSize * gameState.gridSize;
+            // If totalCards is odd, adjust to make it even (for pairs)
+            if (totalCards % 2 !== 0) {
+                totalCards = Math.max(4, totalCards - 1); // Ensure minimum 4 cards (2 pairs)
+            }
+            gameState.totalPairs = totalCards / 2;
+            
+            // Reset scores
+            gameState.player1.score = 0;
+            gameState.player2.score = 0;
+            document.getElementById('player1-score').textContent = '0';
+            document.getElementById('player2-score').textContent = '0';
+            
+            // Update current player display
+            updatePlayerTurnDisplay();
+            
+            // Update level display
+            const levelNames = {
+                'pocetnik': 'Početnik',
+                'srednji': 'Srednji',
+                'napredni': 'Napredni',
+                'tezak': 'Težak',
+                'zabava': 'Zabava'
+            };
+            document.getElementById('current-level').textContent = levelNames[gameState.level] || 'Početnik';
+            document.getElementById('memorize-time').textContent = gameState.memorizeTime;
+            
+            // Generate cards
+            generateCards();
+            
+            // Create reference images
+            createReferenceImages();
+            
+            // Show game screen
+            showScreen('game-screen');
+            
+            // Start memorization phase
+            startMemorizationPhase();
+        }
+
+        // Start memorization phase
+        function startMemorizationPhase() {
+            // Set game mode to memorize
+            gameState.gameMode = 'memorize';
+            document.getElementById('memory-mode').textContent = `Zapamtite karte u ${gameState.memorizeTime} sekundi`;
+            document.getElementById('countdown-timer').textContent = gameState.memorizeTime;
+            
+            // Show all cards face up
+            gameState.cards.forEach(card => {
+                card.classList.add('flipped');
+            });
+            
+            // Disable clicking during memorization
+            memoryGrid.style.pointerEvents = 'none';
+            
+            // Start countdown
+            let timeLeft = gameState.memorizeTime;
+            document.getElementById('countdown-timer').textContent = timeLeft;
+            document.getElementById('voice-instruction').textContent = `Zapamtite karte! Imate ${timeLeft} sekundi`;
+            
+            // Speak instruction
+            speak(`Zapamtite karte! Imate ${timeLeft} sekundi`);
+            
+            gameState.memorizeTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('countdown-timer').textContent = timeLeft;
+                
+                if (timeLeft <= 3 && timeLeft > 0) {
+                    speak(timeLeft.toString());
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(gameState.memorizeTimer);
+                    endMemorizationPhase();
+                }
+            }, 1000);
+        }
+
+        // End memorization phase
+        function endMemorizationPhase() {
+            // Flip all cards back
+            gameState.cards.forEach(card => {
+                card.classList.remove('flipped');
+            });
+            
+            // Enable clicking
+            memoryGrid.style.pointerEvents = 'auto';
+            
+            // Change game mode to play
+            gameState.gameMode = 'play';
+            document.getElementById('memory-mode').textContent = 'Pronađite parove!';
+            document.getElementById('countdown-timer').style.display = 'none';
+            
+            // Start game timer
+            startGameTimer();
+            
+            // Announce whose turn it is
+            const currentPlayerName = gameState.currentPlayer === 1 ? gameState.player1.name : gameState.player2.name;
+            document.getElementById('voice-instruction').textContent = `${currentPlayerName}, na vama je red!`;
+            speak(`${currentPlayerName}, na vama je red! Pronađite parove.`);
+        }
+
+        // Start game timer
+        function startGameTimer() {
+            if (gameState.timer) clearInterval(gameState.timer);
+            
+            gameState.timer = setInterval(() => {
+                gameState.gameTime++;
+                const minutes = Math.floor(gameState.gameTime / 60).toString().padStart(2, '0');
+                const seconds = (gameState.gameTime % 60).toString().padStart(2, '0');
+                document.getElementById('game-time').textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        // Generate memory cards - FIXED: Ensure proper grid layout
+        function generateCards() {
+            memoryGrid.innerHTML = '';
+            
+            // Set grid layout - FIX: Use the gridSize for columns
+            memoryGrid.style.gridTemplateColumns = `repeat(${gameState.gridSize}, 1fr)`;
+            
+            // Calculate card size based on grid size
+            const maxCardSize = Math.min(120, 600 / gameState.gridSize);
+            const cardSize = `${maxCardSize}px`;
+            memoryGrid.style.gap = `${Math.min(10, 100 / gameState.gridSize)}px`;
+            
+            // Get images for the selected category
+            let images = [...imageDatabase[gameState.category]];
+            
+            // Make sure we have enough images
+            while (images.length < gameState.totalPairs) {
+                images = images.concat(images);
+            }
+            
+            // Take only the number of images we need
+            images = images.slice(0, gameState.totalPairs);
+            
+            // Duplicate each image to create pairs
+            let cardImages = [...images, ...images];
+            
+            // Check if we should use fixed positions
+            const gameKey = `${gameState.gridSize}_${gameState.category}`;
+            const savedPositions = gameState.trackProgress ? localStorage.getItem(`cardPositions_${gameKey}`) : null;
+            
+            if (savedPositions && gameState.trackProgress) {
+                // Use saved positions
+                cardImages = JSON.parse(savedPositions);
+            } else {
+                // Shuffle the cards
+                shuffleArray(cardImages);
+                
+                // Save positions if tracking progress is enabled
+                if (gameState.trackProgress) {
+                    localStorage.setItem(`cardPositions_${gameKey}`, JSON.stringify(cardImages));
+                }
+            }
+            
+            // Create card elements - FIX: Create exactly gridSize * gridSize cards
+            const totalCards = gameState.gridSize * gameState.gridSize;
+            for (let i = 0; i < totalCards; i++) {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.index = i;
+                
+                // If we have more card positions than needed, use placeholder
+                if (i < cardImages.length) {
+                    card.dataset.value = cardImages[i];
+                } else {
+                    // Use a placeholder for extra cards (shouldn't happen with even grid sizes)
+                    card.dataset.value = '?';
+                }
+                
+                // Set card size
+                card.style.width = cardSize;
+                card.style.height = cardSize;
+                
+                // Add card content
+                const value = card.dataset.value || '?';
+                card.innerHTML = `
+                    <div class="card-front">
+                        ${value}
+                    </div>
+                    <div class="card-back">
+                        <i class="fas fa-question"></i>
+                    </div>
+                `;
+                
+                // Only add click event if card has a real value
+                if (value !== '?') {
+                    card.addEventListener('click', () => flipCard(card));
+                } else {
+                    card.style.cursor = 'not-allowed';
+                    card.style.opacity = '0.5';
+                }
+                
+                memoryGrid.appendChild(card);
+                gameState.cards.push(card);
+            }
+        }
+
+        // Create reference images at the bottom
+        function createReferenceImages() {
+            categoryReference.innerHTML = '<h3>Pronađite ove parove:</h3>';
+            
+            // Get unique images for reference
+            let images = [...imageDatabase[gameState.category]];
+            
+            // Take only the number of images we need (up to 8 for display)
+            const displayCount = Math.min(8, gameState.totalPairs);
+            images = images.slice(0, displayCount);
+            
+            // Create reference items
+            images.forEach(img => {
+                const item = document.createElement('div');
+                item.className = 'reference-item';
+                
+                const display = document.createElement('div');
+                display.className = 'reference-img';
+                display.style.display = 'flex';
+                display.style.alignItems = 'center';
+                display.style.justifyContent = 'center';
+                display.style.fontSize = '2rem';
+                display.textContent = img;
+                
+                item.appendChild(display);
+                categoryReference.appendChild(item);
+            });
+        }
+
+        // Flip a card
+        function flipCard(card) {
+            // If card is already flipped or matched, or not in play mode, do nothing
+            if (card.classList.contains('flipped') || 
+                card.classList.contains('matched') || 
+                gameState.flippedCards.length >= 2 ||
+                gameState.gameMode !== 'play' ||
+                card.dataset.value === '?') {
+                return;
+            }
+            
+            // Flip the card
+            card.classList.add('flipped');
+            gameState.flippedCards.push(card);
+            
+            // Speak the card value for letters and numbers
+            if (gameState.category === 'slova' || gameState.category === 'brojevi') {
+                const value = card.dataset.value;
+                if (pronunciation[value]) {
+                    speak(pronunciation[value]);
+                }
+            }
+            
+            // If two cards are flipped, check for match
+            if (gameState.flippedCards.length === 2) {
+                gameState.moves++;
+                document.getElementById('moves-count').textContent = gameState.moves;
+                
+                const card1 = gameState.flippedCards[0];
+                const card2 = gameState.flippedCards[1];
+                
+                // Check if cards match
+                if (card1.dataset.value === card2.dataset.value) {
+                    // Match found
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    
+                    // Play correct sound
+                    correctSound.play().catch(e => console.log("Audio play failed:", e));
+                    
+                    // Update score for current player
+                    if (gameState.currentPlayer === 1) {
+                        gameState.player1.score++;
+                        document.getElementById('player1-score').textContent = gameState.player1.score;
+                    } else {
+                        gameState.player2.score++;
+                        document.getElementById('player2-score').textContent = gameState.player2.score;
+                    }
+                    
+                    gameState.matchedPairs++;
+                    
+                    // Speak encouragement
+                    const encouragements = ['Odlično!', 'Bravo!', 'Sjajno!', 'Savršeno!', 'Fantastično!'];
+                    const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+                    speak(randomEncouragement);
+                    
+                    // Clear flipped cards
+                    gameState.flippedCards = [];
+                    
+                    // Check if game is complete
+                    if (gameState.matchedPairs === gameState.totalPairs) {
+                        endGame();
+                    }
+                } else {
+                    // No match - flip cards back after delay
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        gameState.flippedCards = [];
+                        
+                        // Switch players in multiplayer mode
+                        if (gameState.players === 2) {
+                            switchPlayer();
+                        }
+                        // For single player, just continue
+                    }, 1000);
+                }
+            }
+        }
+
+        // Switch player turn
+        function switchPlayer() {
+            // Play turn sound
+            turnSound.play().catch(e => console.log("Audio play failed:", e));
+            
+            // Update current player display
+            document.getElementById('player1-display').classList.toggle('current-player');
+            document.getElementById('player2-display').classList.toggle('current-player');
+            
+            // Update current player in game state
+            gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+            
+            // Announce new player's turn
+            const currentPlayerName = gameState.currentPlayer === 1 ? gameState.player1.name : gameState.player2.name;
+            document.getElementById('voice-instruction').textContent = `${currentPlayerName}, na vama je red!`;
+            speak(`${currentPlayerName}, na vama je red!`);
+        }
+
+        // Update player turn display
+        function updatePlayerTurnDisplay() {
+            // Reset both
+            document.getElementById('player1-display').classList.remove('current-player');
+            document.getElementById('player2-display').classList.remove('current-player');
+            
+            // Set current player
+            if (gameState.currentPlayer === 1) {
+                document.getElementById('player1-display').classList.add('current-player');
+            } else {
+                document.getElementById('player2-display').classList.add('current-player');
+            }
+        }
+
+        // End the game
+        function endGame() {
+            // Stop game timer
+            clearInterval(gameState.timer);
+            
+            // Determine winner
+            let winner = '';
+            let winnerName = '';
+            
+            if (gameState.players === 1) {
+                winner = gameState.player1.name;
+                winnerName = gameState.player1.name;
+                gameState.player1.totalWins++;
+            } else {
+                if (gameState.player1.score > gameState.player2.score) {
+                    winner = gameState.player1.name;
+                    winnerName = gameState.player1.name;
+                    gameState.player1.totalWins++;
+                } else if (gameState.player2.score > gameState.player1.score) {
+                    winner = gameState.player2.name;
+                    winnerName = gameState.player2.name;
+                    gameState.player2.totalWins++;
+                } else {
+                    winner = "Izjednačeno je!";
+                    winnerName = "Oba igrača";
+                }
+            }
+            
+            // Update player stats
+            if (gameState.players === 1) {
+                gameState.player1.totalGames++;
+                gameState.player1.totalTime += gameState.gameTime;
+                gameState.player1.totalMoves += gameState.moves;
+            } else {
+                gameState.player1.totalGames++;
+                gameState.player2.totalGames++;
+                gameState.player1.totalTime += gameState.gameTime;
+                gameState.player2.totalTime += gameState.gameTime;
+                gameState.player1.totalMoves += gameState.moves;
+                gameState.player2.totalMoves += gameState.moves;
+            }
+            
+            // Save game to history
+            saveGameHistory(winner);
+            
+            // Show celebration
+            showCelebration(winnerName);
+            
+            // Speak victory message
+            speak(`Čestitamo ${winnerName}! Pronašli ste sve parove!`);
+        }
+
+        // Show celebration screen
+        function showCelebration(winnerName) {
+            // Update celebration text
+            document.getElementById('celebration-text').textContent = `BRAVO! ${winnerName.toUpperCase()} POBJEĐUJE!`;
+            document.getElementById('winner-name').textContent = `Čestitamo ${winnerName}!`;
+            
+            // Show celebration screen
+            setTimeout(() => {
+                celebrationScreen.classList.add('active');
+                
+                // Play celebration sound
+                celebrationSound.play().catch(e => console.log("Audio play failed:", e));
+                
+                // Launch all celebration effects
+                launchConfetti();
+                setTimeout(launchRockets, 500);
+                setTimeout(playApplause, 1000);
+            }, 1000);
+        }
+
+        // Launch confetti effect
+        function launchConfetti() {
+            const confettiCanvas = document.getElementById('confetti-canvas');
+            const myConfetti = confetti.create(confettiCanvas, {
+                resize: true,
+                useWorker: true
+            });
+            
+            // Confetti configuration
+            myConfetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ff6b6b', '#4d96ff', '#4dccbd', '#ffcc00', '#ff9966', '#9d4dff']
+            });
+        }
+
+        // Launch rockets effect
+        function launchRockets() {
+            const confettiCanvas = document.getElementById('confetti-canvas');
+            const myConfetti = confetti.create(confettiCanvas, {
+                resize: true,
+                useWorker: true
+            });
+            
+            // Rockets from sides
+            myConfetti({
+                particleCount: 50,
+                angle: 60,
+                spread: 80,
+                origin: { x: 0, y: 0.6 },
+                colors: ['#4d96ff', '#ffcc00'],
+                shapes: ['circle', 'square']
+            });
+            
+            myConfetti({
+                particleCount: 50,
+                angle: 120,
+                spread: 80,
+                origin: { x: 1, y: 0.6 },
+                colors: ['#ff6b6b', '#4dccbd'],
+                shapes: ['circle', 'square']
+            });
+            
+            // Play rocket sound
+            rocketSound.play().catch(e => console.log("Audio play failed:", e));
+        }
+
+        // Play applause
+        function playApplause() {
+            applauseSound.play().catch(e => console.log("Audio play failed:", e));
+        }
+
+        // Save game to history
+        function saveGameHistory(winner) {
+            const gameData = {
+                date: new Date().toISOString(),
+                gridSize: gameState.gridSize,
+                level: gameState.level,
+                category: gameState.category,
+                players: gameState.players,
+                player1: { ...gameState.player1 },
+                player2: { ...gameState.player2 },
+                moves: gameState.moves,
+                time: gameState.gameTime,
+                winner: winner,
+                totalPairs: gameState.totalPairs
+            };
+            
+            gameState.gameHistory.push(gameData);
+            
+            // Keep only last 20 games
+            if (gameState.gameHistory.length > 20) {
+                gameState.gameHistory = gameState.gameHistory.slice(-20);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('memoryGameHistory', JSON.stringify(gameState.gameHistory));
+            
+            // Save player stats
+            savePlayerStats();
+        }
+
+        // Save player statistics
+        function savePlayerStats() {
+            const playerStats = {
+                player1: gameState.player1,
+                player2: gameState.player2,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            localStorage.setItem('memoryPlayerStats', JSON.stringify(playerStats));
+        }
+
+        // Load game history
+        function loadGameHistory() {
+            const savedHistory = localStorage.getItem('memoryGameHistory');
+            if (savedHistory) {
+                gameState.gameHistory = JSON.parse(savedHistory);
+            }
+            
+            const savedStats = localStorage.getItem('memoryPlayerStats');
+            if (savedStats) {
+                const stats = JSON.parse(savedStats);
+                gameState.player1 = { ...gameState.player1, ...stats.player1 };
+                gameState.player2 = { ...gameState.player2, ...stats.player2 };
+            }
+        }
+
+        // Show dashboard with statistics
+        function showDashboard() {
+            showScreen('dashboard-screen');
+            updateDashboard();
+        }
+
+        // Update dashboard with current stats
+        function updateDashboard() {
+            // Calculate stats
+            const totalGames = gameState.player1.totalGames + (gameState.player2.totalGames || 0);
+            document.getElementById('total-games').textContent = totalGames;
+            
+            // Calculate average time
+            let totalTime = gameState.player1.totalTime + (gameState.player2.totalTime || 0);
+            let totalPlayers = gameState.players === 1 ? 1 : 2;
+            let avgTime = totalGames > 0 ? Math.round(totalTime / totalGames) : 0;
+            const avgMinutes = Math.floor(avgTime / 60).toString().padStart(2, '0');
+            const avgSeconds = (avgTime % 60).toString().padStart(2, '0');
+            document.getElementById('avg-time').textContent = `${avgMinutes}:${avgSeconds}`;
+            
+            // Calculate average moves
+            let totalMoves = gameState.player1.totalMoves + (gameState.player2.totalMoves || 0);
+            let avgMoves = totalGames > 0 ? Math.round(totalMoves / totalGames) : 0;
+            document.getElementById('avg-moves').textContent = avgMoves;
+            
+            // Calculate success rate (based on moves vs pairs)
+            let successRate = 0;
+            if (totalGames > 0 && totalMoves > 0) {
+                // Estimate success rate: perfect game would be moves = pairs
+                // So success rate = pairs / moves (capped at 100%)
+                const avgPairs = gameState.gridSize * gameState.gridSize / 2;
+                successRate = Math.min(100, Math.round((avgPairs / avgMoves) * 100));
+            }
+            document.getElementById('success-rate').textContent = `${successRate}%`;
+            
+            // Create charts
+            createCharts();
+        }
+
+        // Create charts for dashboard
+        function createCharts() {
+            // Prepare data for charts
+            const gameCount = gameState.gameHistory.length;
+            const labels = gameState.gameHistory.map((game, index) => `Igra ${index + 1}`);
+            
+            // Performance by player chart
+            const player1Wins = gameState.player1.totalWins || 0;
+            const player2Wins = gameState.player2.totalWins || 0;
+            
+            const performanceCtx = document.getElementById('performance-chart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [gameState.player1.name, gameState.player2.name, 'Izjednačenja'],
+                    datasets: [{
+                        data: [player1Wins, player2Wins, gameCount - player1Wins - player2Wins],
+                        backgroundColor: [
+                            '#ff6b6b',
+                            '#4d96ff',
+                            '#cccccc'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Progress over time chart
+            const times = gameState.gameHistory.map(game => game.time);
+            const moves = gameState.gameHistory.map(game => game.moves);
+            
+            const progressCtx = document.getElementById('progress-chart').getContext('2d');
+            new Chart(progressCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Vrijeme (sekunde)',
+                            data: times,
+                            backgroundColor: 'rgba(77, 150, 255, 0.2)',
+                            borderColor: '#4d96ff',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Potezi',
+                            data: moves,
+                            backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                            borderColor: '#ff6b6b',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update tracking status display
+        function updateTrackingStatus() {
+            const statusElement = document.getElementById('tracking-status');
+            if (gameState.trackProgress) {
+                statusElement.textContent = "Praćenje napretka je UKLJUČENO. Pozicije karata će biti dosljedne za tačno mjerenje napretka.";
+                statusElement.style.color = "#4dccbd";
+            } else {
+                statusElement.textContent = "Praćenje napretka je ISKLJUČENO. Pozicije karata će biti nasumične svake igre.";
+                statusElement.style.color = "#ff9966";
+            }
+        }
+
+        // Show specific screen
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active-screen');
+            });
+            document.getElementById(screenId).classList.add('active-screen');
+        }
+
+        // Restart the game
+        function restartGame() {
+            // Stop all timers
+            if (gameState.timer) clearInterval(gameState.timer);
+            if (gameState.memorizeTimer) clearInterval(gameState.memorizeTimer);
+            
+            // Reset game state
+            gameState.cards = [];
+            gameState.flippedCards = [];
+            gameState.matchedPairs = 0;
+            gameState.moves = 0;
+            gameState.gameTime = 0;
+            gameState.currentPlayer = gameState.firstPlayer;
+            
+            // Reset scores
+            gameState.player1.score = 0;
+            gameState.player2.score = 0;
+            
+            // Update displays
+            document.getElementById('player1-score').textContent = '0';
+            document.getElementById('player2-score').textContent = '0';
+            document.getElementById('moves-count').textContent = '0';
+            document.getElementById('game-time').textContent = '00:00';
+            document.getElementById('countdown-timer').style.display = 'block'; // Show timer for memorization
+            document.getElementById('countdown-timer').textContent = '';
+            
+            // Update player turn display
+            updatePlayerTurnDisplay();
+            
+            // Generate new cards
+            generateCards();
+            
+            // Start memorization phase
+            startMemorizationPhase();
+        }
+
+        // Speak text using speech synthesis
+        function speak(text) {
+            if (!gameState.voiceEnabled || !gameState.speechSynth) return;
+            
+            // Cancel any ongoing speech
+            gameState.speechSynth.cancel();
+            
+            // Create speech utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Configure for child-friendly voice
+            utterance.rate = 0.9; // Slower for children
+            utterance.pitch = 1.2; // Higher pitch
+            utterance.volume = 1;
+            
+            // Use selected voice if available
+            if (gameState.voice) {
+                utterance.voice = gameState.voice;
+            }
+            
+            // Speak
+            gameState.speechSynth.speak(utterance);
+        }
+
+        // Utility function to shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
